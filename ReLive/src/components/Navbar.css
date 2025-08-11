@@ -1,0 +1,141 @@
+/* ===== Main Navbar Container: Full Width Fixed ===== */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== Wrapper: Actual Content Centered with BG and Styling ===== */
+.navbar-wrapper {
+  max-width: 1100px;
+  width: 100%;
+  margin: 15px auto;
+  padding: 18px 18px;
+  background: linear-gradient(90deg, #9c27b0, #e91e63);
+  border-radius: 40px;
+  box-shadow: 0 10px 30px rgb(180, 180, 180);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== Logo Section ===== */
+.navbar-logo {
+  height: 50px;
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.15);
+}
+
+/* ===== Right Section: Links and CTA ===== */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* ===== Navbar Links ===== */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.navbar-links a {
+  color: white;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 1.05rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.navbar-links a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: white;
+  transition: width 0.3s ease;
+}
+
+.navbar-links a:hover::after {
+  width: 100%;
+}
+
+.navbar-links a:hover {
+  color: #ffe4f2;
+}
+
+/* ===== Get Started Button ===== */
+.get-started-btn {
+  background: linear-gradient(to right, #9f41dd 50%, #ffffff 50%);
+  background-size: 200% 100%;
+  background-position: right bottom;
+  color: rgb(0, 0, 0);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: 1px solid #000;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.get-started-btn:hover {
+  background-position: left bottom;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* ===== Scroll Hide/Show Animations ===== */
+.navbar.hide {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.navbar.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ===== Responsive Design for Mobile Devices ===== */
+@media (max-width: 768px) {
+  .navbar-wrapper {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .navbar-right {
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .navbar-links a {
+    margin: 0;
+  }
+
+  .get-started-btn {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+  }
+}

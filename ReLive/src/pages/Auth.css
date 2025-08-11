@@ -1,0 +1,201 @@
+.auth-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #8e24aa;
+  margin-bottom: 30px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding-top: 50px;
+}
+
+.auth-card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to right, #ffffff, #ffffff);
+  padding-top: 80px; /* adjust for navbar height */
+  padding-bottom: 50px;
+}
+
+.auth-card {
+  display: flex;
+  width: 900px;
+  background: #f1f1f1;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgb(180, 180, 180);
+}
+
+.auth-sidebar {
+  background: linear-gradient(135deg, #c2185b, #8e24aa);
+  color: #fff;
+  width: 40%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-sidebar h2 {
+  font-size: 1.5rem;
+  margin-bottom: 30px;
+  text-align: center;
+  color:white;
+}
+
+.role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+.role-option {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  padding: 12px 20px;
+  width: 90%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.role-option img {
+  width: 32px;
+  height: 32px;
+}
+
+.role-option span {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.role-option.selected {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #fff;
+}
+
+.auth-form-section {
+  padding: 40px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-form-section h2 {
+  margin-bottom: 20px;
+  color: #880e4f;
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.auth-form button {
+  background: linear-gradient(135deg, #c2185b, #8e24aa);
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.auth-form button:hover {
+  transform: scale(1.05);
+}
+
+.divider {
+  margin: 20px 0;
+  text-align: center;
+  font-weight: bold;
+  color: #aaa;
+}
+
+.google-btn {
+  background: white;
+  color:black;
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;                  /* Align logo + text */
+  align-items: center;           /* Center vertically */
+  gap: 10px;
+  justify-content: center;  
+}
+
+.google-btn:hover {
+  background: #f0f0f0;
+  transform: scale(1.05);
+}
+
+.google-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.toggle-text {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.toggle-text span {
+  margin-left: 6px;
+  color: #ec407a;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding: 10px 40px 10px 10px; /* right padding for the icon */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  height: 45px; /* ensures consistent height for alignment */
+}
+
+.toggle-password {
+  position: absolute;
+  top: 25%;
+  right: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  transition: 0.2s ease;
+}
