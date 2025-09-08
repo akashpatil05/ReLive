@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from .models import Memory      
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,3 +15,10 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+class MemorySerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')  # show username instead of ID
+
+    class Meta:
+        model = Memory
+        fields = ['id', 'user', 'title', 'description', 'image', 'created_at']

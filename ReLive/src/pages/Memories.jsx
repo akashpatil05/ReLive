@@ -9,11 +9,13 @@ import {
   FaStickyNote, 
   FaSearch,
   FaHeart,
+  FaGamepad,
   FaShareAlt,
   FaCalendarAlt,
   FaMapMarkerAlt
 } from "react-icons/fa";
 import { MdOutlinePhotoAlbum, MdFilterList } from "react-icons/md";
+import { Link, useNavigate } from "react-router-dom";
 
 const Memories = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -28,11 +30,13 @@ const Memories = () => {
     setCollapsed(!collapsed);
   };
 
+  // Sidebar options with paths
   const sidebarOptions = [
-    { icon: <MdOutlinePhotoAlbum />, label: "All Memories", active: true },
-    { icon: <FaPlus />, label: "Add Memory" },
-    { icon: <FaUserFriends />, label: "Family" },
-    { icon: <FaTags />, label: "Tags" },
+    { icon: <MdOutlinePhotoAlbum />, label: "All Memories", path: "/memories", active: true },
+    { icon: <FaPlus />, label: "Add Memory", path: "/memories/add" },
+    { icon: <FaUserFriends />, label: "Family", path: "/memories/family" },
+    { icon: <FaTags />, label: "Tags", path: "/memories/tags" },
+    { icon: <FaGamepad />, label: "Games", path: "/dashboard/games" },
   ];
 
   const tagColors = {
@@ -149,10 +153,14 @@ const Memories = () => {
           <FaBars />
         </button>
         {sidebarOptions.map((item, index) => (
-          <div className={`sidebar-item ${item.active ? 'active' : ''}`} key={index}>
+          <Link 
+            to={item.path} 
+            key={index} 
+            className={`sidebar-item ${item.active ? 'active' : ''}`}
+          >
             {item.icon}
             {!collapsed && <span>{item.label}</span>}
-          </div>
+          </Link>
         ))}
         
         {!collapsed && (
@@ -184,10 +192,10 @@ const Memories = () => {
         )}
 
         <div className="sidebar-bottom">
-          <div className="sidebar-item">
+          <Link to="/settings" className="sidebar-item">
             <FaCog />
             {!collapsed && <span>Settings</span>}
-          </div>
+          </Link>
         </div>
       </aside>
 
