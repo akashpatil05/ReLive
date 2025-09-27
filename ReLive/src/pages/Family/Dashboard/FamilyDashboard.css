@@ -1,0 +1,90 @@
+.familydash-page { padding: 1.5rem; min-height: 100vh; background: #f8fafc; font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif; color: #1f2937; }
+.fd-header { text-align: center; margin-bottom: 1.25rem; }
+.fd-header h1 { margin: 0; font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.fd-header p { color: #6b7280; margin: .25rem 0 0; }
+
+.panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+.panel-title { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+.panel-title h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #111827; }
+.emoji { font-size: 1.1rem; }
+
+.fd-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 10px; padding: .75rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+.fd-error button { background: none; border: none; color: #b91c1c; font-size: 1.25rem; cursor: pointer; }
+
+.fd-connect-row { display: flex; gap: .5rem; }
+.fd-connect-row input { flex: 1; height: 44px; border: 2px solid #e5e7eb; border-radius: 8px; padding: 0 .75rem; font-size: .95rem; }
+.fd-connect-row input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.15); }
+.hint { color: #6b7280; font-size: .9rem; margin-top: .4rem; }
+
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; padding: .6rem 1rem; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(102,126,234,.3); }
+.btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; padding: .6rem 1rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+.fd-list-header { display: flex; align-items: center; justify-content: space-between; }
+.count-chip { background: #edf2f7; border: 1px solid #e5e7eb; color: #4b5563; border-radius: 999px; padding: .25rem .65rem; font-size: .8rem; font-weight: 600; }
+
+.fd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .9rem; margin-top: .5rem; }
+.fd-card { display: grid; grid-template-columns: 64px 1fr; gap: .75rem; border: 1px solid #e5e7eb; border-radius: 12px; padding: .9rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.fd-avatar { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #667eea; overflow: hidden; display: grid; place-items: center; background: #eef2ff; }
+.fd-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.fd-avatar-fallback { width: 100%; height: 100%; display: grid; place-items: center; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; font-weight: 800; }
+
+.fd-card-main { display: flex; flex-direction: column; gap: .35rem; }
+.fd-name { margin: 0; font-weight: 800; color: #111827; }
+.fd-relation { margin: 0; color: #6b7280; font-size: .9rem; }
+.fd-actions { display: flex; gap: .5rem; margin-top: .4rem; }
+
+.fd-empty { grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6b7280; }
+.empty-icon { font-size: 2rem; margin-bottom: .25rem; opacity: .8; }
+
+.loading-center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; }
+.spinner { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .fd-connect-row { flex-direction: column; }
+  .fd-actions { justify-content: center; }
+  .fd-card { grid-template-columns: 1fr; text-align: center; }
+}
+
+/* Quick Actions Section */
+.fd-quick-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.fd-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  min-width: 200px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.fd-action-btn:hover {
+  transform: translateY(-2px);
+}
+
+.action-icon {
+  font-size: 2rem;
+}
+
+.action-desc {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  font-weight: normal;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .fd-quick-actions {
+    flex-direction: column;
+  }
+  
+  .fd-action-btn {
+    min-width: 100%;
+  }
+}

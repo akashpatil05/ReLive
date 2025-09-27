@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "./Navbar.css";
+import logo from "../assets/logo.png"; // ✅ Import logo from assets
 
 function Navbar() {
   const [show, setShow] = useState(true);
@@ -27,14 +28,12 @@ function Navbar() {
       <div className="navbar-wrapper">
         <div className="navbar-brand">
           <a href="/">
-            <img src="/logo.png" alt="ReLive Logo" className="navbar-logo" />
+            <img src={logo} alt="ReLive Logo" className="navbar-logo" /> {/* ✅ use imported logo */}
           </a>
         </div>
 
         <div className="navbar-right">
           <div className="navbar-links">
-            <a href="/home">Home</a>
-            <a href="/memories">Memories</a>
             <a href="/aboutUs">About Us</a>
             <a href="/contactUs">Contact Us</a>
           </div>
