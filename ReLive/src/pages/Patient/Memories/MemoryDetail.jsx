@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import AddMemoryModal from "../../../components/AddMemoryModal"; // Import the modal
 import "./MemoryDetail.css";
 
 const API_BASE = "http://127.0.0.1:8000";
@@ -15,12 +16,15 @@ export default function MemoryDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [playingRecording, setPlayingRecording] = useState(null);
   const [likedByUser, setLikedByUser] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const audioRefs = useRef({});
+
+  // ✅ NEW: Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingMemory, setEditingMemory] = useState(null);
 
   // Real data from backend
   const [memoryData, setMemoryData] = useState({
@@ -30,6 +34,24 @@ export default function MemoryDetail() {
     peopleInMemory: [],
     eventTags: []
   });
+
+  // Same formatImageUrl function as Memories.jsx
+  const formatImageUrl = (url) => {
+    if (!url) return null;
+    if (/^https?:\/\//i.test(url)) return url; // Cloudinary secure_url or absolute
+    if (url.startsWith("/")) return `${API_BASE}${url}`; // /media/...
+    if (url.startsWith("media/")) return `${API_BASE}/${url}`; // media/...
+    return url; // base64/others
+  };
+
+  // Same formatImageUrl logic for audio/video URLs
+  const formatMediaUrl = (url) => {
+    if (!url) return null;
+    if (/^https?:\/\//i.test(url)) return url; // Cloudinary or absolute
+    if (url.startsWith("/")) return `${API_BASE}${url}`; // /media/...
+    if (url.startsWith("media/")) return `${API_BASE}/${url}`; // media/...
+    return url;
+  };
 
   const fetchMemoryDetail = useCallback(async () => {
     const access = getAccess();
@@ -42,27 +64,105 @@ export default function MemoryDetail() {
       setLoading(true);
       setError(null);
       
-      // Use enhanced detail endpoint
-      const res = await fetch(`${API_BASE}/api/memories/${memoryId}/detail/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
+      // Try enhanced endpoint first, fallback to standard
+      let res;
+      let isEnhanced = false;
+      
+      try {
+        res = await fetch(`${API_BASE}/api/memories/${memoryId}/detail/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        if (res.ok) {
+          isEnhanced = true;
+        } else if (res.status !== 404) {
+          throw new Error(`Enhanced endpoint error: ${res.status}`);
+        }
+      } catch (enhancedError) {
+        console.log("Enhanced endpoint not available, using standard:", enhancedError.message);
+      }
+      
+      // If enhanced failed, use standard endpoint
+      if (!isEnhanced || !res.ok) {
+        res = await fetch(`${API_BASE}/api/memories/${memoryId}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+      }
       
       if (res.ok) {
         const data = await res.json();
+        console.log("API Response:", data);
+        console.log("Using enhanced endpoint:", isEnhanced);
+        
         setMemory(data);
         setLikedByUser(data.is_liked || false);
-        setLikesCount(data.media_counts?.likes || 0);
+        setLikesCount(data.media_counts?.likes || data.likes_count || 0);
         
-        // Set the media data from backend
-        setMemoryData({
-          photos: data.images || [],
-          voiceRecordings: data.voice_recordings || [],
-          videos: data.videos || [],
-          peopleInMemory: data.tagged_people || [],
-          eventTags: data.event_tags || []
-        });
+        // Initialize media data
+        const mediaData = {
+          photos: [],
+          voiceRecordings: [],
+          videos: [],
+          peopleInMemory: [],
+          eventTags: []
+        };
 
-        // Fetch navigation data
+        // Handle images - prioritize enhanced data, fallback to standard
+        if (isEnhanced && data.images && Array.isArray(data.images) && data.images.length > 0) {
+          // Enhanced endpoint with images array
+          mediaData.photos = data.images.map((img) => ({
+            ...img,
+            image: formatImageUrl(img.resolved_image_url || img.image_url || img.image),
+            resolved_image_url: img.resolved_image_url || img.image_url || img.image
+          }));
+          console.log("Using enhanced images:", mediaData.photos);
+        } else {
+          // Standard endpoint or enhanced without separate images
+          // Use main memory image following same logic as Memories.jsx
+          const resolved = data.resolved_image_url || data.image_url || data.image || null;
+          if (resolved) {
+            const formattedUrl = formatImageUrl(resolved);
+            mediaData.photos = [{
+              id: 1,
+              image_url: resolved,
+              resolved_image_url: resolved,
+              image: formattedUrl,
+              caption: data.title || "Memory image"
+            }];
+            console.log("Using main image as photo:", { original: resolved, formatted: formattedUrl });
+          } else {
+            console.log("No image data found");
+          }
+        }
+
+        // Handle enhanced media types
+        if (isEnhanced) {
+          if (data.videos && Array.isArray(data.videos)) {
+            mediaData.videos = data.videos.map((vid) => ({
+              ...vid,
+              video: formatMediaUrl(vid.resolved_video_url || vid.video_url || vid.video),
+              thumbnail_url: vid.thumbnail_url
+            }));
+          }
+
+          if (data.voice_recordings && Array.isArray(data.voice_recordings)) {
+            mediaData.voiceRecordings = data.voice_recordings.map((audio) => ({
+              ...audio,
+              audio: formatMediaUrl(audio.resolved_audio_url || audio.audio_url || audio.audio)
+            }));
+          }
+
+          if (data.tagged_people && Array.isArray(data.tagged_people)) {
+            mediaData.peopleInMemory = data.tagged_people;
+          }
+
+          if (data.event_tags && Array.isArray(data.event_tags)) {
+            mediaData.eventTags = data.event_tags;
+          }
+        }
+
+        setMemoryData(mediaData);
+
+        // Try to fetch navigation if available
         fetchMemoryNavigation();
       } else if (res.status === 401) {
         navigate("/login");
@@ -92,7 +192,8 @@ export default function MemoryDetail() {
         setNavigation(navData);
       }
     } catch (e) {
-      console.log("Navigation fetch failed:", e);
+      // Navigation is optional, don't show error
+      console.log("Navigation not available");
     }
   }, [memoryId]);
 
@@ -108,9 +209,62 @@ export default function MemoryDetail() {
     }
   };
 
+  // ✅ UPDATED: Handle edit memory
   const handleEdit = () => {
-    // Navigate to edit mode or open edit modal
-    navigate(`/memories/${memoryId}/edit`, { state: { memory, from: "detail" } });
+    console.log("Opening edit modal for memory:", memory);
+    
+    // Prepare memory data for editing
+    // Convert the fetched memory data to the format expected by AddMemoryModal
+    const memoryForEdit = {
+      ...memory,
+      // Make sure we have the main image URL in the expected format
+      image: memory.resolved_image_url || memory.image_url || memory.image,
+      image_url: memory.resolved_image_url || memory.image_url || memory.image,
+      resolved_image_url: memory.resolved_image_url || memory.image_url || memory.image
+    };
+    
+    setEditingMemory(memoryForEdit);
+    setEditModalOpen(true);
+  };
+
+  // ✅ NEW: Handle memory update success
+  const handleMemoryUpdated = (updatedMemory) => {
+    console.log("Memory updated successfully:", updatedMemory);
+    
+    // Update the current memory state with new data
+    const resolved = updatedMemory.resolved_image_url || updatedMemory.image_url || updatedMemory.image || null;
+    const memoryWithFormattedImage = {
+      ...updatedMemory,
+      image: formatImageUrl(resolved),
+      resolved_image_url: resolved
+    };
+    
+    setMemory(memoryWithFormattedImage);
+    
+    // Update the photos in memoryData if main image changed
+    if (resolved) {
+      const formattedUrl = formatImageUrl(resolved);
+      setMemoryData(prev => ({
+        ...prev,
+        photos: prev.photos.length > 0 && prev.photos[0].id === 1 
+          ? [{
+              id: 1,
+              image_url: resolved,
+              resolved_image_url: resolved,
+              image: formattedUrl,
+              caption: updatedMemory.title || "Memory image"
+            }, ...prev.photos.slice(1)]
+          : prev.photos
+      }));
+    }
+    
+    // Close the modal
+    setEditModalOpen(false);
+    setEditingMemory(null);
+    
+    // Show success message (optional)
+    // You could add a toast notification here
+    console.log("✅ Memory updated successfully");
   };
 
   const handleDelete = async () => {
@@ -120,13 +274,22 @@ export default function MemoryDetail() {
     if (!access) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/memories/${memoryId}/detail/`, {
+      // Try enhanced endpoint first, fall back to standard
+      let res = await fetch(`${API_BASE}/api/memories/${memoryId}/detail/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${access}` },
       });
 
-      if (res.ok) {
-        navigate(-1); // Go back to previous page
+      // If enhanced endpoint fails, use standard
+      if (!res.ok && res.status === 404) {
+        res = await fetch(`${API_BASE}/api/memories/${memoryId}/`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${access}` },
+        });
+      }
+
+      if (res.ok || res.status === 204) {
+        navigate(-1);
       } else {
         alert("Failed to delete memory");
       }
@@ -159,7 +322,6 @@ export default function MemoryDetail() {
         // Revert on failure
         setLikedByUser(wasLiked);
         setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
-        console.error("Like toggle failed");
       }
     } catch (e) {
       // Revert on error
@@ -172,7 +334,6 @@ export default function MemoryDetail() {
   };
 
   const handlePlayRecording = (recording) => {
-    // Stop any currently playing recording
     if (playingRecording && audioRefs.current[playingRecording]) {
       audioRefs.current[playingRecording].pause();
     }
@@ -197,12 +358,17 @@ export default function MemoryDetail() {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    if (!dateString) return "No date";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (e) {
+      return dateString;
+    }
   };
 
   const getAvatarInitials = (name) => {
@@ -277,16 +443,12 @@ export default function MemoryDetail() {
           <span className="back-icon">←</span> Back To Memories
         </button>
         <div className="action-buttons">
-          {memory.can_edit && (
-            <>
-              <button className="edit-btn" onClick={handleEdit}>
-                <span className="edit-icon">✏️</span> Edit Memory
-              </button>
-              <button className="delete-btn" onClick={handleDelete}>
-                <span className="delete-icon">🗑️</span> Delete
-              </button>
-            </>
-          )}
+          <button className="edit-btn" onClick={handleEdit}>
+            <span className="edit-icon">✏️</span> Edit Memory
+          </button>
+          <button className="delete-btn" onClick={handleDelete}>
+            <span className="delete-icon">🗑️</span> Delete
+          </button>
           <button 
             className={`like-btn ${likedByUser ? 'liked' : ''}`}
             onClick={handleLikeToggle}
@@ -314,7 +476,7 @@ export default function MemoryDetail() {
           )}
           <div className="meta-item">
             <span className="meta-icon">👤</span>
-            <span>By {memory.user_display}</span>
+            <span>By {memory.user_display || memory.username || "Unknown"}</span>
           </div>
         </div>
       </div>
@@ -334,8 +496,14 @@ export default function MemoryDetail() {
                 onClick={() => setCurrentImageIndex(index)}
               >
                 <img 
-                  src={photo.resolved_image_url || photo.image_url || photo.image} 
+                  src={photo.image || "https://ui-avatars.com/api/?name=IMG&background=ccc&color=666&size=300"}
                   alt={photo.caption || `Memory photo ${index + 1}`} 
+                  loading="lazy"
+                  onError={(e) => {
+                    console.error("Image load error for:", photo);
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "https://ui-avatars.com/api/?name=IMG&background=ccc&color=666&size=300";
+                  }}
                 />
                 {photo.caption && (
                   <div className="photo-caption">{photo.caption}</div>
@@ -359,7 +527,10 @@ export default function MemoryDetail() {
                 <video 
                   controls 
                   poster={video.thumbnail_url}
-                  src={video.resolved_video_url || video.video_url || video.video}
+                  src={video.video}
+                  onError={(e) => {
+                    console.error("Video load error:", video);
+                  }}
                 >
                   Your browser does not support the video tag.
                 </video>
@@ -424,9 +595,12 @@ export default function MemoryDetail() {
                   ref={el => audioRefs.current[recording.id] = el}
                   onEnded={() => setPlayingRecording(null)}
                   style={{ display: 'none' }}
+                  onError={(e) => {
+                    console.error("Audio load error:", recording);
+                  }}
                 >
                   <source 
-                    src={recording.resolved_audio_url || recording.audio_url || recording.audio} 
+                    src={recording.audio}
                     type="audio/mpeg" 
                   />
                 </audio>
@@ -574,6 +748,17 @@ export default function MemoryDetail() {
           )}
         </div>
       )}
+
+      {/* ✅ ADD: Edit Memory Modal */}
+      <AddMemoryModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingMemory(null);
+        }}
+        onCreated={handleMemoryUpdated}
+        editingMemory={editingMemory}
+      />
     </div>
   );
 }

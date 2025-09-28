@@ -442,17 +442,26 @@ def add_memory_image(request, memory_id):
     except Memory.DoesNotExist:
         return Response({"error": "Memory not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    data = request.data.copy()
-    data['memory'] = memory.id
+    # ✅ FIX: Don't copy request.data when it contains files
+    data = {
+        'memory': memory.id,
+        'caption': request.data.get('caption', ''),
+        'order': request.data.get('order', 0),
+    }
     
     # Handle Cloudinary upload
     file_obj = request.FILES.get("image")
     if file_obj:
         try:
+            print(f"📷 Uploading image to Cloudinary: {file_obj.name}")
             upload_res = cloudinary.uploader.upload(file_obj, folder="memory_images")
             data["image_url"] = upload_res.get("secure_url")
+            print(f"✅ Image upload successful: {data['image_url']}")
         except Exception as e:
-            return Response({"error": f"Upload failed: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"❌ Cloudinary image upload failed: {e}")
+            return Response({"error": f"Image upload failed: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({"error": "No image file provided"}, status=status.HTTP_400_BAD_REQUEST)
     
     serializer = MemoryImageSerializer(data=data)
     if serializer.is_valid():
@@ -478,22 +487,41 @@ def add_memory_video(request, memory_id):
     except Memory.DoesNotExist:
         return Response({"error": "Memory not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    data = request.data.copy()
-    data['memory'] = memory.id
+    # ✅ FIX: Don't copy request.data when it contains files
+    data = {
+        'memory': memory.id,
+        'caption': request.data.get('caption', ''),
+        'order': request.data.get('order', 0),
+    }
     
     # Handle Cloudinary upload for video
     file_obj = request.FILES.get("video")
     if file_obj:
         try:
+            print(f"📹 Uploading video to Cloudinary: {file_obj.name}")
             upload_res = cloudinary.uploader.upload(file_obj, 
                                                   folder="memory_videos",
                                                   resource_type="video")
             data["video_url"] = upload_res.get("secure_url")
-            data["thumbnail_url"] = upload_res.get("eager", [{}])[0].get("secure_url") if upload_res.get("eager") else None
+            
+            # Extract duration if available
             if upload_res.get("duration"):
-                data["duration"] = f"00:{int(upload_res['duration']//60):02d}:{int(upload_res['duration']%60):02d}"
+                minutes = int(upload_res["duration"] // 60)
+                seconds = int(upload_res["duration"] % 60)
+                data["duration"] = f"{minutes:02d}:{seconds:02d}"
+                
+            # Extract thumbnail URL if available
+            if upload_res.get("secure_url"):
+                # Cloudinary auto-generates thumbnail for videos
+                thumbnail_url = upload_res["secure_url"].replace("/video/upload/", "/video/upload/c_thumb,w_300,h_200/")
+                data["thumbnail_url"] = thumbnail_url
+                
+            print(f"✅ Video upload successful: {data['video_url']}")
         except Exception as e:
-            return Response({"error": f"Upload failed: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"❌ Cloudinary video upload failed: {e}")
+            return Response({"error": f"Video upload failed: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({"error": "No video file provided"}, status=status.HTTP_400_BAD_REQUEST)
     
     serializer = MemoryVideoSerializer(data=data)
     if serializer.is_valid():
@@ -519,22 +547,36 @@ def add_memory_voice_recording(request, memory_id):
     except Memory.DoesNotExist:
         return Response({"error": "Memory not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    data = request.data.copy()
-    data['memory'] = memory.id
+    # ✅ FIX: Don't copy request.data when it contains files
+    data = {
+        'memory': memory.id,
+        'speaker_name': request.data.get('speaker_name', 'Unknown Speaker'),
+        'speaker_relation': request.data.get('speaker_relation', ''),
+        'order': request.data.get('order', 0),
+    }
     
     # Handle Cloudinary upload for audio
     file_obj = request.FILES.get("audio")
     if file_obj:
         try:
+            print(f"🎤 Uploading audio to Cloudinary: {file_obj.name}")
             upload_res = cloudinary.uploader.upload(file_obj, 
                                                   folder="memory_audio",
                                                   resource_type="video")  # Cloudinary uses "video" for audio files
             data["audio_url"] = upload_res.get("secure_url")
+            
             # Extract duration if available
             if upload_res.get("duration"):
-                data["duration"] = f"00:00:{int(upload_res['duration']):02d}"
+                minutes = int(upload_res["duration"] // 60)
+                seconds = int(upload_res["duration"] % 60)
+                data["duration"] = f"{minutes:02d}:{seconds:02d}"
+                
+            print(f"✅ Audio upload successful: {data['audio_url']}")
         except Exception as e:
-            return Response({"error": f"Upload failed: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"❌ Cloudinary audio upload failed: {e}")
+            return Response({"error": f"Audio upload failed: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({"error": "No audio file provided"}, status=status.HTTP_400_BAD_REQUEST)
     
     serializer = MemoryVoiceRecordingSerializer(data=data)
     if serializer.is_valid():
