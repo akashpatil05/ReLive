@@ -9,17 +9,17 @@ export default function Footer() {
         <div className="footer-left">
           <img src="/logo.png" alt="ReLive Logo" className="footer-logo" />
           <p className="footer-desc">
-            ReLive helps individuals with Alzheimer’s relive their most cherished memories through personalized audio, photos, and interactive storytelling.
+            ReLive helps individuals with Alzheimer's relive their most cherished memories through personalized audio, photos, and interactive storytelling.
           </p>
 
           <div className="footer-contact">
             <div className="contact-item">
               <img src="/icons/mail.png" alt="Mail" className="icon" />
-              <span>support@relive.app</span>
+              <span>akash.apatil05@gmail.com</span>
             </div>
             <div className="contact-item">
               <img src="/icons/phone.png" alt="Phone" className="icon" />
-              <span>+91 98765 43210</span>
+              <span>+91 7666639680</span>
             </div>
             <div className="contact-item">
               <img src="/icons/location.png" alt="Location" className="icon" />
